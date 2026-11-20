@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panamá a Mano · E-Magazine · Edición No. 1</title>
+<style>
+/* =========================================================
+   PANAMÁ A MANO · E-MAGAZINE POP-UP · por María Madrid
+   Texto: Times New Roman 12 pt · Títulos 14 pt
+   Interlineado 1.5 · Párrafos justificados
+   ========================================================= */
+:root{
+  --ink:#1c1a2b; --paper:#fbf6ec; --paper2:#f1e7d3; --kraft:#e6d3b0;
+  --red:#c8102e; --orange:#ef7d22; --gold:#e9b44c; --teal:#0f7f81; --plum:#5a2a82;
+  --muted:#6b6577; --cream:#f7efe1;
+  --mx:0; --my:0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:"Times New Roman",Times,serif;color:var(--ink);
+  background:radial-gradient(ellipse at 50% 40%,#3a3450 0%,#1a1726 60%,#110f19 100%)}
+button{font-family:inherit;cursor:pointer}
+p{font-size:12pt;line-height:1.5;text-align:justify;margin-bottom:.6em}
+h2{font-size:14pt;line-height:1.5;font-weight:700}
+h3{font-size:14pt;line-height:1.4;font-weight:700}
+.fill{background:#fff3a6;color:#3a3000;outline:1px dashed #c9a400;padding:0 3px;border-radius:3px}
+body.clean .fill{background:none;outline:none;padding:0;color:inherit}
+
+/* ---------- barras ---------- */
+
+/* ---------- libro ---------- */
+.scene{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;perspective:2600px}
+.scaler{flex:none;width:1240px;height:860px;transform-origin:center center}
+.book{position:relative;width:100%;height:100%;transition:transform 1s cubic-bezier(.4,.1,.2,1);
+  transform:translateX(var(--shift,0px)) rotateY(calc(var(--mx) * 2.2deg)) rotateX(calc(var(--my) * -2deg))}
+.book.closed{--shift:-25%}
+.book::after{content:"";position:absolute;left:4%;right:4%;bottom:-26px;height:40px;border-radius:50%;
+  background:radial-gradient(ellipse,#0009 0%,transparent 70%);z-index:-1;transition:.8s}
+.book.closed::after{left:52%;right:2%}
+.leaf{position:absolute;left:50%;top:0;width:50%;height:100%;transform-origin:left center;transform-style:preserve-3d;
+  transform:perspective(3000px) rotateY(0deg);transition:transform 1.15s cubic-bezier(.45,.05,.25,1)}
+.leaf.flipped{transform:perspective(3000px) rotateY(-180deg)}
+.pg{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;perspective:1100px;
+  background:var(--paper);padding:44px 50px 64px;color:var(--ink)}
+.pg.back{transform:rotateY(180deg)}
+.pg.front{border-radius:0 8px 8px 0}
+.pg.back{border-radius:8px 0 0 8px}
+.pg.front::before,.pg.back::before{content:"";position:absolute;top:0;bottom:0;width:70px;pointer-events:none;z-index:40}
+.pg.front::before{left:0;background:linear-gradient(90deg,#0000003d,#0000000f 30%,transparent)}
+.pg.back::before{right:0;background:linear-gradient(270deg,#0000003d,#0000000f 30%,transparent)}
+.pg::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:39;border-radius:inherit;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E")}
+.pg.blank{background:var(--paper2)}
+/* esquinas para pasar página */
+.corner{position:absolute;bottom:0;width:90px;height:90px;border:none;background:none;z-index:45}
+.corner::after{position:absolute;bottom:4px;font-size:22px;line-height:1;color:#5e5240;transition:.3s}
+.front .corner::after{content:"\203A";right:9px}.back .corner::after{content:"\2039";left:9px}
+.corner:hover::after{bottom:14px}.front .corner:hover::after{right:18px}.back .corner:hover::after{left:18px}
+.front .corner{right:0}.back .corner{left:0}
+.front .corner::before{border-width:0 0 36px 36px!important}.back .corner::before{border-width:0 36px 36px 0!important}
+.front .corner:hover::before{border-width:0 0 62px 62px!important}.back .corner:hover::before{border-width:0 62px 62px 0!important}
+.corner::before{content:"";position:absolute;bottom:0;width:0;height:0;transition:.3s;border-style:solid}
+.front .corner::before{right:0;border-width:0 0 26px 26px;border-color:transparent transparent #0000 transparent;
+  background:linear-gradient(135deg,transparent 50%,#e9dcc3 50%);box-shadow:-3px -3px 6px #0002}
+.back .corner::before{left:0;background:linear-gradient(225deg,transparent 50%,#e9dcc3 50%);box-shadow:3px -3px 6px #0002;border-width:0 26px 26px 0;border-color:transparent}
+.corner:hover::before{border-width:0 0 46px 46px}
+.back .corner:hover::before{border-width:0 46px 46px 0}
+.folio{position:absolute;bottom:22px;left:50px;right:50px;display:flex;justify-content:space-between;font-size:9.5pt;letter-spacing:.1em;opacity:.65;z-index:2}
+
+/* ---------- fondos de página ---------- */
+.bg-ink{background:var(--ink);color:var(--cream)}
+.bg-red{background:#9e0f27;color:var(--cream)}
+.bg-teal{background:#0d6a6c;color:var(--cream)}
+.bg-plum{background:#4a2270;color:var(--cream)}
+.bg-kraft{background:var(--kraft)}
+.bg-sky{background:#e3efe9}
+.bg-gold{background:#f6dfa4}
+.stripe-l{border-left:12px solid transparent;border-image:repeating-linear-gradient(180deg,var(--red) 0 14px,var(--ink) 14px 18px,var(--gold) 18px 32px,var(--ink) 32px 36px,var(--teal) 36px 50px,var(--ink) 50px 54px) 12}
+
+/* ---------- tipografía editorial ---------- */
+.kicker{font-size:10pt;letter-spacing:.32em;text-transform:uppercase;color:var(--red);display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.kicker::before{content:"";width:30px;height:2px;background:currentColor}
+.bg-ink .kicker,.bg-red .kicker,.bg-teal .kicker,.bg-plum .kicker{color:var(--gold)}
+.ttl{font-size:14pt;text-transform:uppercase;letter-spacing:.14em;margin-bottom:10px}
+.lead{font-size:14pt;font-style:italic;line-height:1.4;border-left:3px solid var(--gold);padding-left:14px;margin:6px 0 14px;text-align:left}
+.hint{font-size:10.5pt;font-style:italic;opacity:.75;text-align:left;margin-bottom:8px}
+.bignum{position:absolute;font-size:170px;font-style:italic;line-height:1;color:transparent;-webkit-text-stroke:1.5px currentColor;opacity:.13;pointer-events:none;z-index:0}
+
+/* ---------- POP-UP ---------- */
+.pop{transform-origin:50% 100%;transform:rotateX(-92deg);opacity:0;
+  translate:calc(var(--mx) * var(--z,6) * -1px) calc(var(--my) * var(--z,6) * -1px);
+  transition:transform .4s ease-in,opacity .3s .1s,translate .25s linear;
+  filter:drop-shadow(0 10px 8px rgba(0,0,0,.32))}
+.up .pop{transform:rotateX(0deg);opacity:1;
+  transition:transform 1s cubic-bezier(.3,1.55,.55,1) var(--d,0s),opacity .15s var(--d,0s),translate .25s linear}
+.popzone{position:relative}
+.ground{position:absolute;left:8%;right:8%;bottom:-6px;height:16px;border-radius:50%;background:radial-gradient(ellipse,#0004,transparent 70%);
+  transform:scaleX(.2);opacity:0;transition:.5s}
+.up .ground{transform:none;opacity:1;transition:.8s .3s}
+
+/* ---------- espacios de imagen ---------- */
+.slot{position:relative;width:100%;height:100%;border-radius:4px;overflow:hidden;cursor:pointer;
+  background:repeating-linear-gradient(45deg,#e8dcc4 0 10px,#f2e9d8 10px 20px);border:2px dashed #a89474;
+  display:flex;align-items:center;justify-content:center;text-align:center}
+.slot:hover{border-color:var(--red)}
+.slot .ph{padding:10px;font-size:10pt;line-height:1.3;color:#5e5240}
+.slot .ph b{display:block;font-size:10.5pt;color:var(--ink);margin-bottom:4px}
+.slot .ph code{font-family:Consolas,monospace;font-size:8.5pt;background:#fff;color:var(--red);padding:1px 5px;border-radius:3px}
+.slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.slot.filled{border:none}.slot.filled .ph{display:none}
+.photo{background:#fff;padding:9px 9px 26px;border-radius:3px;position:absolute}
+.photo .cap{position:absolute;left:0;right:0;bottom:5px;font-size:9.5pt;font-style:italic;text-align:center;color:var(--muted)}
+
+/* ---------- solapas ---------- */
+.flap{position:relative;perspective:900px;cursor:pointer}
+.flap .under{position:relative;height:100%;border-radius:8px;padding:12px 16px;background:#fffdf8;color:var(--ink);box-shadow:inset 0 2px 8px #0002}
+.flap .under p{margin:0;font-size:12pt}
+.flap .lid{position:absolute;inset:0;transform-origin:50% 0;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.3,1.25,.5,1);z-index:2}
+.flap.open .lid{transform:rotateX(108deg)}
+.flap.open{z-index:5}
+.lid .lf,.lid .lb{position:absolute;inset:0;border-radius:8px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.lid .lf{display:flex;flex-direction:column;justify-content:center;padding:12px 18px;box-shadow:0 4px 10px #0003;color:#fff}
+.lid .lf b{font-size:14pt;line-height:1.3}
+.lid .lf span{font-size:10pt;letter-spacing:.18em;text-transform:uppercase;opacity:.8;margin-top:6px}
+.lid .lb{transform:rotateX(180deg);background:repeating-linear-gradient(135deg,#e9dcc3 0 8px,#f3eadb 8px 16px);box-shadow:0 -4px 10px #0003}
+.flap:not(.open):hover .lid{transform:rotateX(14deg)}
+
+/* ---------- PORTADA ---------- */
+.cover{background:var(--ink);color:var(--cream);padding:40px 46px 50px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips span{border:1px solid #ffffff45;border-radius:999px;padding:3px 12px;font-size:9.5pt;letter-spacing:.2em;text-transform:uppercase}
+.cover h1{font-size:100px;line-height:.9;font-style:italic;letter-spacing:-.02em;margin-top:22px}
+.cover h1 span{color:var(--gold)}
+.cover .sub{font-size:10.5pt;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-top:10px}
+.cover .popzone{height:400px;margin-top:20px}
+.ml{position:absolute;bottom:0}
+.ml1{left:calc(50% - 200px);width:400px;height:300px;background:var(--red);border-radius:180px 180px 10px 10px;
+  box-shadow:inset 0 0 0 9px var(--ink),inset 0 0 0 17px var(--gold),inset 0 0 0 25px var(--ink)}
+.ml2{left:calc(50% - 165px);width:330px;height:250px;background:var(--orange);border-radius:150px 150px 8px 8px;
+  box-shadow:inset 0 0 0 8px var(--ink),inset 0 0 0 15px var(--teal),inset 0 0 0 22px var(--ink)}
+.ml3{left:calc(50% - 128px);width:256px;height:206px;background:var(--plum);border-radius:120px 120px 6px 6px;
+  box-shadow:inset 0 0 0 7px var(--ink),inset 0 0 0 13px var(--gold)}
+.cover .photo{left:calc(50% - 98px);bottom:0;width:196px;height:230px;transform-origin:50% 100%}
+.seal{position:absolute;right:20px;top:0;width:104px;height:104px;border-radius:50%;background:var(--gold);color:var(--ink);
+  display:flex;align-items:center;justify-content:center;text-align:center;font-size:11pt;line-height:1.15;font-style:italic;
+  box-shadow:inset 0 0 0 5px var(--ink),inset 0 0 0 8px var(--gold),inset 0 0 0 9px var(--ink)}
+.seal.pop{transform:rotateX(-92deg) rotate(-12deg)}
+.up .seal.pop{transform:rotate(-12deg)}
+.teasers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}
+.teasers button{all:unset;cursor:pointer;border-top:2px solid var(--gold);padding-top:8px;font-size:11pt;line-height:1.35;transition:.2s}
+.teasers button i{display:block;font-size:20px;color:var(--orange)}
+.teasers button:hover{color:var(--gold);transform:translateY(-3px)}
+.byline{margin-top:16px;font-size:12pt;letter-spacing:.06em}
+.byline b{color:var(--gold)}
+
+/* ---------- índice ---------- */
+.toc{margin-top:8px}
+.toc button{all:unset;cursor:pointer;display:flex;align-items:baseline;gap:8px;width:100%;padding:3px 6px;font-size:12pt;border-radius:4px}
+.toc button:hover{background:var(--gold)}
+.toc .dots{flex:1;border-bottom:1.5px dotted #0004;transform:translateY(-4px)}
+.toc i{color:var(--red);min-width:22px}
+.colophon{margin-top:14px;padding:14px 16px;border:1.5px solid var(--ink);border-radius:6px;position:relative}
+.colophon p{font-size:12pt;margin:0}
+.howto{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.howto div{background:var(--ink);color:var(--cream);border-radius:6px;padding:8px;text-align:center;font-size:10pt;line-height:1.3}
+.howto b{display:block;color:var(--gold);font-size:11pt}
+
+/* ---------- bios ---------- */
+.bio-photo{position:relative;width:250px;height:320px;float:left;margin:4px 26px 8px 0}
+.bio-photo .photo{inset:0}
+.quote{clear:both;font-size:14pt;font-style:italic;line-height:1.4;text-align:center;border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);padding:12px 20px;margin-top:10px}
+.role{font-style:italic;color:var(--gold);margin-bottom:8px;font-size:12pt}
+
+/* ---------- valores ---------- */
+.mvgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+.mvcard{background:#fff;border-radius:8px;padding:14px 16px;border-top:5px solid var(--red);box-shadow:0 8px 18px -12px #0006}
+.mvcard.v{border-color:var(--teal)}
+.mvcard h3{margin-bottom:4px}
+.mvcard p{margin:0}
+.stamps{display:flex;justify-content:space-between;margin-top:14px}
+.stamp{width:100px;height:100px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:11pt;line-height:1.2;font-weight:700;
+  color:var(--cream);background:var(--ink);box-shadow:inset 0 0 0 4px var(--ink),inset 0 0 0 6px var(--gold);padding:8px}
+.stamp:nth-child(2){background:var(--red)}.stamp:nth-child(3){background:var(--teal)}.stamp:nth-child(4){background:var(--plum)}.stamp:nth-child(5){background:var(--orange)}
+
+/* ---------- grids de solapas ---------- */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fgrid .flap{height:132px}
+
+/* ---------- maleta ---------- */
+.needs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:6px 0 12px}
+.needs div{background:#fff;border-radius:8px;padding:10px 14px;border-left:5px solid var(--teal)}
+.needs div:last-child{border-color:var(--red)}
+.needs b{font-size:12pt}
+.needs ul{padding-left:18px;font-size:12pt;line-height:1.45}
+.pv{background:var(--ink);color:var(--cream);border-radius:10px;padding:16px 20px;position:relative}
+.pv p{margin:0;font-size:14pt;font-style:italic;line-height:1.45;text-align:left}
+.pv b{color:var(--gold);font-style:normal;font-size:10pt;letter-spacing:.25em;text-transform:uppercase;display:block;margin-bottom:4px}
+
+/* ---------- volvelle (rueda) ---------- */
+.volv{position:relative;width:390px;height:390px;margin:6px auto 0}
+.disk{position:absolute;inset:0;border-radius:50%;cursor:grab;transition:transform .7s cubic-bezier(.3,1.3,.5,1);
+  background:conic-gradient(from -20deg,#c8102e 0 40deg,#ef7d22 0 80deg,#e9b44c 0 120deg,#0f7f81 0 160deg,#5a2a82 0 200deg,#c8102e 0 240deg,#ef7d22 0 280deg,#e9b44c 0 320deg,#0f7f81 0 360deg);
+  box-shadow:0 0 0 6px var(--cream),0 0 0 8px var(--ink),0 14px 30px #0008}
+.disk.drag{transition:none;cursor:grabbing}
+.disk .lbl{position:absolute;left:50%;top:50%;width:120px;margin-left:-60px;text-align:center;font-size:11.5pt;line-height:1.15;font-weight:700;color:#fff;pointer-events:none;text-shadow:0 1px 2px #0006}
+.hub{position:absolute;left:50%;top:50%;width:92px;height:92px;margin:-46px 0 0 -46px;border-radius:50%;background:var(--cream);
+  box-shadow:inset 0 0 0 5px var(--ink),0 4px 10px #0007;display:flex;align-items:center;justify-content:center;text-align:center;
+  font-size:9.5pt;color:var(--ink);line-height:1.15;letter-spacing:.06em;pointer-events:none}
+.window{position:absolute;left:50%;top:-16px;width:136px;height:150px;margin-left:-68px;border:5px solid var(--cream);border-bottom:none;
+  border-radius:12px 12px 0 0;pointer-events:none;clip-path:polygon(0 0,100% 0,100% 100%,50% 100%,0 100%)}
+.window::after{content:"";position:absolute;left:50%;top:-20px;margin-left:-12px;border:12px solid transparent;border-top-color:var(--gold)}
+.vtext{margin-top:16px;background:#ffffff10;border:1px solid #ffffff2a;border-radius:10px;padding:12px 18px;min-height:132px}
+.vtext h3{color:var(--gold)}
+.vtext p{margin:0}
+.vbtns{display:flex;justify-content:center;gap:10px;margin-top:10px}
+.vbtn{background:transparent;border:1px solid #ffffff50;color:var(--cream);border-radius:999px;padding:5px 16px;font-size:11pt}
+.vbtn:hover{background:var(--gold);color:var(--ink)}
+
+/* ---------- lengüeta ---------- */
+.pull{position:relative;height:150px;margin-top:12px;border-radius:10px;background:var(--ink)}
+.pull .stats{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);align-items:center;text-align:center;color:var(--cream);padding:0 30px 0 10px}
+.stats .v{font-size:40px;font-style:italic;color:var(--gold);line-height:1}
+.stats .l{font-size:10.5pt;line-height:1.25;margin-top:6px;padding:0 6px}
+.pcover{position:absolute;top:0;right:0;bottom:0;width:100%;border-radius:10px;
+  background:repeating-linear-gradient(90deg,var(--red) 0 22px,#b10d28 22px 26px);display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:14pt;font-style:italic;text-align:center;padding:0 40px 0 70px;box-shadow:-6px 0 12px #0005;overflow:visible}
+.ptab{position:absolute;left:-44px;top:50%;margin-top:-30px;width:64px;height:60px;border-radius:30px 0 0 30px;background:var(--gold);color:var(--ink);
+  display:flex;align-items:center;justify-content:center;font-size:10pt;font-weight:700;letter-spacing:.12em;cursor:ew-resize;box-shadow:-3px 3px 8px #0005;touch-action:none;user-select:none}
+.ptab::after{content:"";position:absolute;left:10px;width:10px;height:10px;border-radius:50%;background:var(--ink);opacity:.25}
+.ptab span{margin-left:14px}
+.pull-wrap{padding-left:44px}
+.ptxt{font-style:italic;transition:opacity .3s;white-space:nowrap}.pcover.open .ptxt{opacity:0}.pcover.open{padding:0}
+
+/* ---------- zonas ---------- */
+.zscene{height:290px;margin-top:6px;border-radius:10px;background:linear-gradient(#cfe6e0 0%,#e3efe9 62%,#bfd6a8 62%,#a9c58f 100%);position:relative}
+.zscene svg{position:absolute;bottom:0}
+.flag{position:absolute;bottom:42px;width:90px;margin-left:-45px;text-align:center;cursor:pointer;background:none;border:none}
+.flag svg{position:relative;display:block;margin:0 auto;width:60px;height:96px}
+.flag span{display:block;font-size:10.5pt;line-height:1.15;font-weight:700;background:var(--paper);border-radius:4px;padding:2px 4px;margin-top:2px;color:var(--ink)}
+.flag.on span{background:var(--red);color:#fff}
+.flag:hover svg{transform:translateY(-6px);transition:.2s}
+.zinfo{margin-top:14px;background:#fff;border-radius:10px;padding:14px 18px;border-left:6px solid var(--red);min-height:165px}
+.zinfo .kicker{margin-bottom:0}
+.zinfo p{margin:0}
+.zinfo.swap{animation:fadein .5s}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}}
+
+/* ---------- etiquetas de producto ---------- */
+.prods{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 16px;margin-top:6px}
+.prod{height:268px;perspective:900px}
+.prod .in{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .8s cubic-bezier(.3,1.3,.5,1)}
+.prod.flip .in{transform:rotateY(180deg)}
+.prod .pf,.prod .pb{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:#fffdf7;padding:10px;display:flex;flex-direction:column}
+.prod .pb{transform:rotateY(180deg);background:var(--ink);color:var(--cream);justify-content:center;padding:16px}
+.prod .pf::before{content:"";position:absolute;top:-8px;left:50%;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:var(--kraft);box-shadow:inset 0 0 0 4px var(--ink)}
+.prod .simg{height:132px}
+.prod h3{font-size:12pt;margin-top:8px;line-height:1.25}
+.prod .price{font-size:14pt;color:var(--red);font-weight:700;font-style:italic}
+.prod .more{all:unset;cursor:pointer;margin-top:auto;font-size:10pt;letter-spacing:.14em;text-transform:uppercase;text-align:center;background:var(--ink);color:var(--cream);border-radius:999px;padding:4px 0}
+.prod .more:hover{background:var(--red)}
+.prod .pb dl{font-size:12pt;line-height:1.45}
+.prod .pb dt{color:var(--gold);font-size:10pt;letter-spacing:.14em;text-transform:uppercase}
+.prod .pb dd{margin-bottom:6px}
+.prod .pb .more{background:var(--gold);color:var(--ink)}
+
+/* ---------- calculadora ---------- */
+.formula{font-size:14pt;font-style:italic;text-align:center;background:#ffffff10;border-radius:8px;padding:8px;margin:6px 0 10px}
+.sl{margin-top:8px}
+.sl label{font-size:11pt;display:flex;justify-content:space-between}
+.sl label output{color:var(--gold);font-weight:700}
+.sl input{width:100%;accent-color:var(--gold)}
+.res{margin-top:12px;background:var(--gold);color:var(--ink);border-radius:10px;padding:12px 18px;display:flex;align-items:center;gap:18px}
+.res .big{font-size:40px;font-style:italic;font-weight:700;line-height:1}
+.res .sm{font-size:11pt;line-height:1.35}
+table{width:100%;border-collapse:collapse;font-size:12pt;margin-top:6px}
+th,td{padding:4px 10px;text-align:left;border-bottom:1px solid #ffffff22}
+th{color:var(--gold);font-weight:700;font-size:11pt;letter-spacing:.08em}
+td:last-child,th:last-child{text-align:right}
+tr.tot td{border-top:2px solid var(--gold);font-weight:700;color:var(--gold)}
+
+/* ---------- listas cortas ---------- */
+.lists{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:26px}
+.lists h3{font-size:14pt;border-bottom:2px solid var(--red);margin-bottom:6px}
+.lists ul{padding-left:18px;font-size:12pt;line-height:1.5}
+
+/* ---------- curiosidades ---------- */
+.fstack{display:flex;flex-direction:column;gap:12px}
+.fstack .flap{height:122px}
+.fan{height:150px}
+.fcard{position:absolute;bottom:0;width:110px;height:140px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:84px;font-style:italic;font-weight:700;color:var(--cream);
+  box-shadow:inset 0 0 0 6px #0003}
+
+/* ---------- test ---------- */
+.quiz{background:#fff;border-radius:12px;padding:26px 28px;min-height:330px;box-shadow:0 10px 24px -14px #0008;margin-top:10px}
+.qbar{display:flex;gap:5px;margin-bottom:12px}.qbar i{flex:1;height:6px;border-radius:9px;background:#0001}.qbar i.on{background:var(--red)}
+.qopts{display:grid;gap:9px;margin-top:10px}
+.qopt{all:unset;cursor:pointer;padding:16px 18px;border-radius:8px;background:var(--paper2);font-size:12pt;transition:.2s;border:1.5px solid transparent}
+.qopt:hover{background:var(--gold);border-color:var(--ink)}
+.qres{text-align:center}
+.qres .score{font-size:80px;font-style:italic;color:var(--red);line-height:1}
+.qres p{text-align:center}
+.qagain{all:unset;cursor:pointer;background:var(--ink);color:var(--cream);border-radius:999px;padding:6px 18px;font-size:11pt}
+.cep-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px}
+.cep-mini div{background:var(--ink);color:var(--cream);border-radius:8px;padding:16px 14px;font-size:11pt;line-height:1.3}
+.cep-mini b{color:var(--gold);display:block;font-size:12pt}
+
+/* ---------- conclusión / biblio ---------- */
+.learn{background:var(--gold);border-radius:8px;padding:12px 16px;margin-top:4px}
+.learn p{margin:0}
+.ref{padding-left:36px;text-indent:-36px;text-align:left;margin-bottom:9px}
+.backcover{display:flex;flex-direction:column;align-items:center;text-align:center}
+.backcover .popzone{width:100%;height:330px;margin-top:20px}
+.backcover h2{font-size:14pt;letter-spacing:.2em;text-transform:uppercase;margin-top:22px;color:var(--gold)}
+.backcover .big{font-size:58px;font-style:italic;line-height:1;margin-top:6px}
+.backcover p{text-align:center}
+.btn{all:unset;cursor:pointer;background:var(--gold);color:var(--ink);border-radius:999px;padding:8px 20px;font-size:11pt;letter-spacing:.06em;margin-top:8px}
+.btn:hover{background:var(--cream)}
+
+.toast{position:fixed;left:50%;bottom:66px;transform:translate(-50%,20px);background:var(--gold);color:var(--ink);padding:8px 18px;border-radius:999px;font-size:11pt;opacity:0;transition:.35s;z-index:60;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+
+
+<div class="scene" id="scene"><div class="scaler" id="scaler"><div class="book closed" id="book"></div></div></div>
+
+<div class="toast" id="toast"></div>
+
+<!-- =================== PÁGINAS (en orden) =================== -->
+<div id="src" hidden>
+
+<!-- P0 · PORTADA -->
+<section class="pg cover">
+  <div class="chips"><span>Edición No. 1</span><span>Noviembre 2026</span><span>Semestral</span></div>
+  <h1>Panamá<br><span>a Mano</span></h1>
+  <div class="sub">E-Magazine · Emprendimiento artesanal</div>
+  <div class="popzone">
+    <div class="ml ml1 pop" style="--d:.15s;--z:4"></div>
+    <div class="ml ml2 pop" style="--d:.35s;--z:8"></div>
+    <div class="ml ml3 pop" style="--d:.55s;--z:12"></div>
+    <div class="photo pop" style="--d:.8s;--z:18"><div class="slot" data-src="img/portada.jpg" data-label="Imagen de portada"></div><div class="cap">Hecho en el Istmo</div></div>
+    <div class="seal pop" style="--d:1.1s;--z:22">Hecho<br>a mano en<br>Panamá</div>
+    <div class="ground"></div>
+  </div>
+  <div class="teasers">
+    <button data-goto="3"><i>01</i>Misión y visión de un negocio con raíces</button>
+    <button data-goto="4"><i>02</i>Gira la rueda del modelo Canvas</button>
+    <button data-goto="8"><i>03</i>Test: ¿qué tan emprendedor eres?</button>
+  </div>
+  <p class="byline" style="text-align:left">Plan de negocio, textos y diseño por <b>María Madrid</b></p>
+  <button class="corner" data-dir="1" aria-label="Abrir"></button>
+</section>
+
+<!-- P1 · ÍNDICE -->
+<section class="pg stripe-l">
+  <div class="kicker">Edición No. 1 · Noviembre 2026</div>
+  <h2 class="ttl">En esta edición</h2>
+  <div class="toc" id="toc"></div>
+  <div class="colophon">
+    <p><b>Panamá a Mano</b> es una revista digital de publicación semestral dirigida a estudiantes universitarios. Dirección, redacción y diseño: María Madrid. Curso de Formación de Emprendedores, Universidad Tecnológica de Panamá.</p>
+  </div>
+  <div class="howto">
+    <div><b>Pasa</b>las páginas desde las esquinas inferiores</div>
+    <div><b>Levanta</b>las solapas de papel</div>
+    <div><b>Tira</b>de las lengüetas amarillas</div>
+    <div><b>Gira</b>la rueda del Canvas</div>
+  </div>
+  <div class="folio"><span>p. 1</span><span>Panamá a Mano</span></div>
+  <button class="corner" data-dir="-1" aria-label="Anterior"></button>
+</section>
+
+<!-- P2 · INTRODUCCIÓN -->
+<section class="pg">
+  <div class="popzone" style="height:170px;margin:-6px -10px 22px">
+    <div class="pop" style="--d:.1s;--z:3;position:absolute;inset:0" data-svg="skyBack"></div>
+    <div class="pop" style="--d:.4s;--z:10;position:absolute;inset:0" data-svg="skyFront"></div>
+    <div class="ground"></div>
+  </div>
+  <div class="kicker">Editorial</div>
+  <h2 class="ttl">Introducción</h2>
+  <p class="lead">Emprender es «acometer y comenzar una obra, un negocio, un empeño, especialmente si encierran dificultad o peligro» (Real Academia Española, citado en Camargo, s.f.).</p>
+  <p>Cada año, miles de turistas recorren el Casco Antiguo, llegan en crucero o pasan por Tocumen buscando un recuerdo auténtico de Panamá. Mientras tanto, artesanas y artesanos de nuestras comarcas y provincias elaboran molas, sombreros pintaos, cestas y tallas de tagua que muchas veces venden a intermediarios, a precios que no reconocen su trabajo.</p>
+  <p>De esa observación nace <b>Panamá a Mano</b>: una tienda física y en línea de artesanía panameña para turistas, que compra de forma directa y justa a las comunidades y cuenta la historia detrás de cada pieza.</p>
+  <p>En estas páginas presentamos el plan de negocio paso a paso, con base en los contenidos del curso. Y como todo buen libro desplegable, esta revista se lee con las manos: levanta, tira, gira y descubre.</p>
+  <div class="folio"><span>Panamá a Mano · Edición No. 1</span><span>p. 2</span></div>
+  <button class="corner" data-dir="1" aria-label="Siguiente"></button>
+</section>
+
+<!-- P3 · BIOGRAFÍA MARÍA -->
+<section class="pg bg-red">
+  <div class="bignum" style="right:30px;top:20px">MM</div>
+  <div class="kicker">Biografías</div>
+  <h2 class="ttl">La autora</h2>
+  <div class="bio-photo popzone"><div class="photo pop" style="--d:.3s;--z:14"><div class="slot" data-src="img/maria.jpg" data-label="Tu fotografía"></div><div class="cap">María Madrid</div></div></div>
+  <h3 style="font-size:14pt">María Madrid</h3>
+  <div class="role">Autora, editora y emprendedora de Panamá a Mano</div>
+  <p>María Madrid es auditora de procesos y estudiante de cuarto año de la Licenciatura en Ingeniería de Software en la Universidad Tecnológica de Panamá. Su trabajo consiste en revisar cómo funcionan las cosas y encontrar dónde mejorarlas.</p>
+  <p>Esa misma mirada la llevó a notar que el valor de la artesanía panameña se pierde en el camino entre la artesana y el comprador. Con Panamá a Mano une su interés por la cultura del país con la organización y el control de calidad que aplica cada día. Le apasionan el arte y la pintura, por eso ve en cada mola y en cada sombrero pintao una obra de arte hecha a mano.</p>
+  <div class="quote">«Cada pieza tiene una historia; mi trabajo es que llegue completa a quien la compra.»</div>
+  <div class="folio"><span>p. 3</span><span>Panamá a Mano</span></div>
+  <button class="corner" data-dir="-1" aria-label="Anterior"></button>
+</section>
+
+<!-- P4 · INVITADO -->
+<section class="pg">
+  <div class="kicker" style="color:var(--teal)">Biografías</div>
+  <h2 class="ttl">Invitada especial</h2>
+  <div style="display:grid;grid-template-columns:190px 1fr;gap:22px;align-items:start">
+    <div class="popzone" style="height:230px"><div class="photo pop" style="--d:.3s;--z:12;inset:0"><div class="slot" data-src="img/invitada.jpg" data-label="Foto de Marianela González"></div><div class="cap">Marianela González</div></div></div>
+    <div>
+      <h3>Marianela González</h3>
+      <p style="font-style:italic;color:var(--teal);margin-bottom:6px">Artesana, especialista en sistemas y fundadora de Panamá Artesanal</p>
+      <p>Marianela González trabaja desde hace 39 años en el área de sistemas de La Estrella de Panamá, y desde niña aprendió a tejer y bordar. En 2021 fundó Panamá Artesanal, un grupo de más de 60 mujeres que aprenden a confeccionar la pollera. Une tecnología y tradición: creó herramientas como «Marca Fácil» para bordar más rápido sin perder calidad (Crespo, 2024).</p>
+    </div>
+  </div>
+  <h3 style="margin:10px 0 2px">Tres preguntas, tres respuestas</h3>
+  <p class="hint">Respuestas resumidas de su entrevista con La Estrella de Panamá (Crespo, 2024). Levanta cada solapa.</p>
+  <div class="fstack" data-group>
+    <div class="flap" style="height:104px"><div class="under"><p>Su madre hacía polleras y ella aprendió a tejer y bordar de niña, en casa de su abuela y de sus vecinas. En 2004 estudió un diplomado de costura tradicional en la Universidad de Panamá y empezó a enseñar a otras mujeres.</p></div><div class="lid"><div class="lf" style="background:var(--teal)"><b>¿Cómo empezó en la artesanía?</b><span>Levanta la solapa</span></div><div class="lb"></div></div></div>
+    <div class="flap" style="height:104px"><div class="under"><p>Los materiales son cada vez más caros, por eso busca optimizar los procesos. Además, en un mundo dominado por la inmediatez, a muchos jóvenes les falta paciencia para aprender un oficio tradicional.</p></div><div class="lid"><div class="lf" style="background:var(--red)"><b>¿Cuáles son sus mayores retos?</b><span>Levanta la solapa</span></div><div class="lb"></div></div></div>
+    <div class="flap" style="height:104px"><div class="under"><p>Valorar la paciencia y la constancia que exige el trabajo hecho a mano, y preferir lo artesanal sobre lo masivo, porque su valor está en la dedicación, la historia y la cultura de cada pieza.</p></div><div class="lid"><div class="lf" style="background:var(--plum)"><b>¿Qué consejo les da a los jóvenes?</b><span>Levanta la solapa</span></div><div class="lb"></div></div></div>
+  </div>
+  <div class="folio"><span>Panamá a Mano · Edición No. 1</span><span>p. 4</span></div>
+  <button class="corner" data-dir="1" aria-label="Siguiente"></button>
+</section>
+
+<!-- P5 · MISIÓN Y VISIÓN -->
+<section class="pg bg-gold">
+  <div style="display:grid;grid-template-columns:1fr 230px;align-items:end;gap:10px">
+    <div>
+      <div class="kicker">Contenido · 1</div>
+      <h2 class="ttl">Misión, visión y función del emprendimiento</h2>
+    </div>
+    <div class="popzone" style="height:150px"><div class="pop" style="--d:.3s;--z:14;position:absolute;inset:0" data-svg="sombrero"></div><div class="ground"></div></div>
+  </div>
+  <div class="mvgrid">
+    <div class="mvcard"><h3>Misión</h3><p>Conectar a los visitantes de Panamá con artesanía auténtica hecha a mano, comprando de forma directa y justa a las comunidades artesanas y contando la historia de cada pieza.</p></div>
+    <div class="mvcard v"><h3>Visión</h3><p>Ser en cinco años la marca de referencia en artesanía panameña para turistas, presente en los principales puntos turísticos del país y con ventas en línea a todo el mundo.</p></div>
+  </div>
+  <h3 style="margin-top:14px">Función dentro del emprendimiento</h3>
+  <p>Panamá a Mano es el puente entre quien crea y quien compra: selecciona las piezas en las comunidades, controla su calidad, las etiqueta con el nombre de quien las hizo y las vende en tienda, ferias e internet. El valor no está solo en el objeto, sino en la confianza y la historia que lo acompañan.</p>
+  <h3>Nuestros valores</h3>
+  <div class="stamps">
+    <div class="stamp pop" style="--d:.5s">Autenti&shy;cidad</div>
+    <div class="stamp pop" style="--d:.6s">Comercio justo</div>
+    <div class="stamp pop" style="--d:.7s">Respeto cultural</div>
+    <div class="stamp pop" style="--d:.8s">Calidad</div>
+    <div class="stamp pop" style="--d:.9s">Servicio</div>
+  </div>
+  <div class="folio"><span>p. 5</span><span>Panamá a Mano</span></div>
+  <button class="corner" data-dir="-1" aria-label="Anterior"></button>
+</section>
+
+<!-- P6 · FORMACIÓN DEL EMPRENDEDOR -->
+<section class="pg bg-teal">
+  <div class="bignum" style="right:26px;top:10px">06</div>
+  <div class="kicker">Contenido · 2</div>
+  <h2 class="ttl">Importancia en la formación del emprendedor</h2>
+  <p>Según Silva (2008), la personalidad emprendedora reúne atributos de carácter, motivaciones y atributos intelectuales. Además de conocimientos técnicos, emprender exige habilidades blandas como la comunicación, el liderazgo y la resiliencia (Universidad Tecnológica de Panamá [UTP], s.f.-a). Levanta cada solapa para ver cómo se aplican estas conductas en Panamá a Mano.</p>
+  <div class="fgrid" data-group>
+    <div class="flap"><div class="under"><p>Empezar en ferias y en línea antes de alquilar un local reduce la inversión inicial.</p></div><div class="lid"><div class="lf" style="background:var(--ink)"><b>Riesgo calculado</b><span>Levanta</span></div><div class="lb"></div></div></div>
+    <div class="flap"><div class="under"><p>Ganarse la confianza de las comunidades artesanas toma visitas, tiempo y cumplir lo prometido.</p></div><div class="lid"><div class="lf" style="background:var(--red)"><b>Perseverancia</b><span>Levanta</span></div><div class="lb"></div></div></div>
+    <div class="flap"><div class="under"><p>Alianzas con hoteles, guías turísticos y agencias de cruceros para llegar al cliente.</p></div><div class="lid"><div class="lf" style="background:var(--orange)"><b>Redes de contacto</b><span>Levanta</span></div><div class="lb"></div></div></div>
+    <div class="flap"><div class="under"><p>Etiquetas con código QR que cuentan la historia de la artesana que hizo cada pieza.</p></div><div class="lid"><div class="lf" style="background:var(--plum)"><b>Creatividad e innovación</b><span>Levanta</span></div><div class="lb"></div></div></div>
+    <div class="flap"><div class="under"><p>Metas medibles, control de inventario y revisión mensual de los resultados.</p></div><div class="lid"><div class="lf" style="background:#b8860b"><b>Planificación</b><span>Levanta</span></div><div class="lb"></div></div></div>
+    <div class="flap"><div class="under"><p>Atender en inglés y español, y saber contar la historia de cada pieza al turista.</p></div><div class="lid"><div class="lf" style="background:var(--ink)"><b>Comunicación</b><span>Levanta</span></div><div class="lb"></div></div></div>
+  </div>
+  <div class="folio"><span>Panamá a Mano · Edición No. 1</span><span>p. 6</span></div>
+  <button class="corner" data-dir="1" aria-label="Siguiente"></button>
+</section>
+
+<!-- P7 · CLIENTE Y PROPUESTA DE VALOR -->
+<section class="pg">
+  <div style="display:grid;grid-template-columns:1fr 200px;gap:10px;align-items:end">
+    <div>
+      <div class="kicker">Contenido · 3</div>
+      <h2 class="ttl">Nuestro cliente y la propuesta de valor</h2>
+      <p>Nuestro cliente es el turista nacional o extranjero, de 25 a 60 años, que visita Panamá por placer, por negocios o en crucero. Quiere llevarse un recuerdo auténtico y de calidad, y le gusta saber quién lo hizo.</p>
+    </div>
+    <div class="popzone" style="height:180px"><div class="pop" style="--d:.3s;--z:14;position:absolute;inset:0" data-svg="maleta"></div><div class="ground"></div></div>
+  </div>
+  <p class="hint" style="margin-top:4px">Perfil del cliente (UTP, s.f.-c)</p>
+  <div class="needs">
+    <div><b>Lo que busca</b><ul><li>Piezas originales y bien hechas</li><li>Saber de dónde vienen</li><li>Pagar con tarjeta o en línea</li></ul></div>
+    <div><b>Lo que le molesta</b><ul><li>No saber si es una imitación</li><li>Precios poco claros</li><li>Piezas frágiles para viajar</li></ul></div>
+  </div>
+  <div class="pv pop" style="--d:.6s;--z:6">
+    <b>Propuesta de valor</b>
+    <p>Artesanía 100 % panameña, verificada y con historia: cada pieza lleva el nombre y la comunidad de quien la elaboró, viaja en empaque protegido y puede enviarse a cualquier país. El turista compra con confianza; la artesana recibe un pago justo.</p>
+  </div>
+  <div class="folio"><span>p. 7</span><span>Panamá a Mano</span></div>
+  <button class="corner" data-dir="-1" aria-label="Anterior"></button>
+</section>
+
+<!-- P8 · CANVAS (RUEDA) -->
+<section class="pg bg-ink">
+  <div class="kicker">Contenido · 4</div>
+  <h2 class="ttl">El modelo Canvas en una rueda</h2>
+  <p class="hint" style="opacity:.85">El Canvas describe el negocio en nueve módulos relacionados entre sí (Clark et al., 2012). Gira la rueda con el dedo o el ratón, o toca los botones.</p>
+  <div class="volv pop" style="--d:.3s;--z:10">
+    <div class="disk" id="disk"></div>
+    <div class="window"></div>
+    <div class="hub">MODELO<br>CANVAS</div>
+  </div>
+  <div class="vbtns"><button class="vbtn" id="vprev">&#8249; Anterior</button><button class="vbtn" id="vnext">Siguiente &#8250;</button></div>
+  <div class="vtext" id="vtext"></div>
+  <div class="folio"><span>Panamá a Mano · Edición No. 1</span><span>p. 8</span></div>
+  <button class="corner" data-dir="1" aria-label="Siguiente"></button>
+</section>
+
+<!-- P9 · COMUNIDAD E IMPACTO -->
+<section class="pg">
+  <div class="kicker">Contenido · 5</div>
+  <h2 class="ttl">Comunidad empresarial e impacto en la sociedad</h2>
+  <div style="display:grid;grid-template-columns:1fr 210px;gap:20px">
+    <div>
+      <p>Ningún emprendimiento crece solo: forma parte de un ecosistema de instituciones públicas y privadas, inversionistas y otros emprendedores (Núñez et al., 2015, citado en UTP, s.f.-b). En Panamá, ese ecosistema incluye a la AMPYME, las universidades y sus incubadoras, y los gremios de turismo y comercio.</p>
+      <p>El impacto social está en el centro del modelo: al comprar de forma directa, más dinero llega a las familias artesanas, se valora el trabajo de las mujeres de las comunidades y se ayuda a que las técnicas tradicionales pasen a las nuevas generaciones.</p>
+    </div>
+    <div class="popzone" style="height:260px"><div class="photo pop" style="--d:.3s;--z:12;inset:0"><div class="slot" data-src="img/comunidad.jpg" data-label="Foto de una comunidad o feria artesanal"></div><div class="cap">Feria de artesanía panameña</div></div></div>
+  </div>
+  <p class="hint" style="margin-top:6px">Metas del primer año. Arrastra la lengüeta hacia la derecha.</p>
+  <div class="pull-wrap">
+    <div class="pull" id="pull">
+      <div class="stats">
+        <div><div class="v">5</div><div class="l">comunidades artesanas aliadas</div></div>
+        <div><div class="v">+40</div><div class="l">artesanas y artesanos proveedores</div></div>
+        <div><div class="v">60%</div><div class="l">del precio final para quien hace la pieza</div></div>
+        <div><div class="v">3</div><div class="l">canales de venta activos</div></div>
+      </div>
+      <div class="pcover" id="pcover"><div class="ptab" id="ptab"><span>TIRA</span></div><em class="ptxt">Tira de la lengüeta para descubrir nuestras metas</em></div>
+    </div>
+  </div>
+  <div class="folio"><span>p. 9</span><span>Panamá a Mano</span></div>
+  <button class="corner" data-dir="-1" aria-label="Anterior"></button>
+</section>
+
+<!-- P10 · ZONIFICACIÓN -->
+<section class="pg bg-sky">
+  <div class="kicker" style="color:var(--teal)">Contenido · 6</div>
+  <h2 class="ttl">Zonificación de nuestras actividades</h2>
+  <p>Las ventas se concentran donde está el turista y las compras, donde están las artesanas. Toca cada banderín para conocer qué hacemos en cada zona.</p>
+  <div class="zscene">
+    <div class="pop" style="--d:.15s;--z:3;position:absolute;left:0;right:0;bottom:62px;height:130px" data-svg="skyMini"></div>
+    <div class="pop" style="--d:.45s;--z:8;position:absolute;left:-10px;bottom:22px;width:200px;height:96px" data-svg="barco"></div>
+    <div id="flags"></div>
+  </div>
+  <div class="zinfo" id="zinfo"></div>
+  <div class="folio"><span>Panamá a Mano · Edición No. 1</span><span>p. 10</span></div>
+  <button class="corner" data-dir="1" aria-label="Siguiente"></button>
+</section>
+
+<!-- P11 · TARIFAS -->
+<section class="pg bg-kraft">
+  <div class="kicker">Contenido · 7</div>
+  <h2 class="ttl">Tarifas y catálogo</h2>
+  <p class="hint">Precios estimados del plan. Toca «Ver detalle» para dar vuelta a cada etiqueta.</p>
+  <div class="prods" id="prods"></div>
+  <p class="hint" style="margin-top:10px">Envío internacional según peso y destino. Los precios deben validarse con proveedores y con el mercado.</p>
+  <div class="folio"><span>p. 11</span><span>Panamá a Mano</span></div>
+  <button class="corner" data-dir="-1" aria-label="Anterior"></button>
+</section>
+
+<!-- P12 · PUNTO DE EQUILIBRIO E INVERSIÓN -->
+<section class="pg bg-ink">
+  <div class="kicker">Contenido · 8</div>
+  <h2 class="ttl">Herramientas financieras: punto de equilibrio</h2>
+  <p>El punto de equilibrio indica cuántas piezas hay que vender para cubrir todos los gastos, sin ganar ni perder (UTP, s.f.-b). Mueve los controles y mira cómo cambia.</p>
+  <div class="formula">Punto de equilibrio = Costos fijos ÷ (Precio − Costo por pieza)</div>
+  <div class="sl"><label>Costos fijos mensuales <output id="ocf"></output></label><input type="range" id="cf" min="300" max="3000" step="50" value="1200"></div>
+  <div class="sl"><label>Precio promedio por pieza <output id="opv"></output></label><input type="range" id="pv" min="10" max="120" step="1" value="40"></div>
+  <div class="sl"><label>Costo promedio por pieza <output id="ocv"></output></label><input type="range" id="cv" min="5" max="100" step="1" value="24"></div>
+  <div class="res"><div class="big" id="pe"></div><div class="sm" id="pe2"></div></div>
+  <h3 style="margin-top:14px;color:var(--gold)">Inversión inicial estimada</h3>
+  <table>
+    <tr><th>Concepto</th><th>Monto</th></tr>
+    <tr><td>Inventario inicial</td><td>B/. 2,500</td></tr>
+    <tr><td>Mobiliario y exhibidores</td><td>B/. 1,200</td></tr>
+    <tr><td>Tienda en línea y marca</td><td>B/. 600</td></tr>
+    <tr><td>Empaques y etiquetas QR</td><td>B/. 400</td></tr>
+    <tr><td>Trámites y permisos</td><td>B/. 300</td></tr>
+    <tr class="tot"><td>Total</td><td>B/. 5,000</td></tr>
+  </table>
+  <div class="folio"><span>Panamá a Mano · Edición No. 1</span><span>p. 12</span></div>
+  <button class="corner" data-dir="1" aria-label="Siguiente"></button>
+</section>
+
+<!-- P13 · EVALUACIÓN -->
+<section class="pg">
+  <div class="bignum" style="right:30px;top:6px;color:var(--plum)">FODA</div>
+  <div class="kicker" style="color:var(--plum)">Contenido · 9</div>
+  <h2 class="ttl">Evaluación del proyecto</h2>
+  <p class="hint">Análisis FODA: levanta cada solapa.</p>
+  <div class="fgrid" data-group>
+    <div class="flap" style="height:185px"><div class="under"><p>Producto auténtico y con historia. Relación directa con las artesanas. Experiencia en control de calidad.</p></div><div class="lid"><div class="lf" style="background:var(--teal)"><b>Fortalezas</b><span>Levanta</span></div><div class="lb"></div></div></div>
+    <div class="flap" style="height:185px"><div class="under"><p>Marca nueva, todavía sin clientes. Producción artesanal limitada y lenta.</p></div><div class="lid"><div class="lf" style="background:var(--orange)"><b>Debilidades</b><span>Levanta</span></div><div class="lb"></div></div></div>
+    <div class="flap" style="height:185px"><div class="under"><p>Llegada de turistas y cruceros. Interés creciente por el comercio justo y lo hecho a mano.</p></div><div class="lid"><div class="lf" style="background:var(--plum)"><b>Oportunidades</b><span>Levanta</span></div><div class="lb"></div></div></div>
+    <div class="flap" style="height:185px"><div class="under"><p>Imitaciones industriales más baratas. Temporadas bajas de turismo.</p></div><div class="lid"><div class="lf" style="background:var(--red)"><b>Amenazas</b><span>Levanta</span></div><div class="lb"></div></div></div>
+  </div>
+  <div class="lists">
+    <div><h3>Herramientas</h3><ul><li>Tienda en línea con envíos</li><li>Instagram, Facebook y TikTok</li><li>Pagos con tarjeta y Yappy</li><li>Control de inventario</li></ul></div>
+    <div><h3>Estructura</h3><ul><li>Gerente y compradora: María Madrid</li><li>Vendedor bilingüe</li><li>Contador externo</li><li>Aviso de operación y registro en AMPYME</li></ul></div>
+  </div>
+  <div class="folio"><span>p. 13</span><span>Panamá a Mano</span></div>
+  <button class="corner" data-dir="-1" aria-label="Anterior"></button>
+</section>
+
+<!-- P14 · ¿SABÍAS QUE? -->
+<section class="pg bg-plum">
+  <div style="display:grid;grid-template-columns:1fr 250px;align-items:end">
+    <div><div class="kicker">Segmento especial</div><h2 class="ttl">¿Sabías que…?</h2><p style="text-align:left">Tres curiosidades de la artesanía panameña para contar en tu próximo viaje.</p></div>
+    <div class="popzone fan">
+      <div class="fcard pop" style="--d:.2s;--z:5;left:10px;background:var(--red);rotate:-12deg">¿</div>
+      <div class="fcard pop" style="--d:.4s;--z:10;left:70px;background:var(--orange)">?</div>
+      <div class="fcard pop" style="--d:.6s;--z:15;left:130px;background:var(--teal);rotate:12deg">!</div>
+    </div>
+  </div>
+  <div class="fstack" data-group style="margin-top:14px">
+    <div class="flap"><div class="under"><p>En lengua guna, <i>mola</i> se refiere a la tela o la blusa. Los paneles que hoy se venden como arte nacieron como parte de la vestimenta de las mujeres gunas, que los llevan en el pecho y la espalda.</p></div><div class="lid"><div class="lf" style="background:var(--red)"><b>¿Qué significa la palabra «mola»?</b><span>Levanta la solapa</span></div><div class="lb"></div></div></div>
+    <div class="flap"><div class="under"><p>La semilla de la palma de tagua, cuando se seca, se vuelve dura, blanca y lisa como el marfil. Por eso se la llama «marfil vegetal»: permite tallar figuras finas sin dañar a ningún animal.</p></div><div class="lid"><div class="lf" style="background:var(--teal)"><b>¿Por qué a la tagua le dicen «marfil vegetal»?</b><span>Levanta la solapa</span></div><div class="lb"></div></div></div>
+    <div class="flap"><div class="under"><p>Se cuentan las «vueltas» del tejido: mientras más vueltas y más fina la trenza, más horas de trabajo lleva y mayor es su valor. Algunos tardan semanas en terminarse.</p></div><div class="lid"><div class="lf" style="background:var(--orange)"><b>¿Cómo se sabe si un sombrero pintao es fino?</b><span>Levanta la solapa</span></div><div class="lb"></div></div></div>
+  </div>
+  <div class="folio"><span>Panamá a Mano · Edición No. 1</span><span>p. 14</span></div>
+  <button class="corner" data-dir="1" aria-label="Siguiente"></button>
+</section>
+
+<!-- P15 · TEST -->
+<section class="pg bg-gold">
+  <div class="kicker">Zona interactiva</div>
+  <h2 class="ttl">Test: ¿qué tan emprendedor eres?</h2>
+  <p>Cinco preguntas basadas en las conductas emprendedoras del curso (UTP, s.f.-a). Responde con sinceridad.</p>
+  <div class="quiz"><div class="qbar" id="qbar"></div><div id="qsteps"></div></div>
+  <div class="cep-mini">
+    <div><b>Carácter</b>dinamismo, perseverancia, riesgo calculado</div>
+    <div><b>Motivaciones</b>logro, independencia, realizar un ideal</div>
+    <div><b>Intelecto</b>planificación, visión estratégica, juicio crítico</div>
+  </div>
+  <p class="hint" style="margin-top:6px">Clasificación de la personalidad emprendedora según Silva (2008).</p>
+  <div class="folio"><span>p. 15</span><span>Panamá a Mano</span></div>
+  <button class="corner" data-dir="-1" aria-label="Anterior"></button>
+</section>
+
+<!-- P16 · CONCLUSIÓN -->
+<section class="pg">
+  <div class="kicker">Cierre</div>
+  <h2 class="ttl">Conclusión</h2>
+  <p>Panamá a Mano demuestra que una buena idea de negocio nace de observar el entorno: turistas que buscan un recuerdo auténtico y artesanas que necesitan un canal justo para vender. Al unir ambas necesidades surge una propuesta de valor clara, basada en la autenticidad, la historia de cada pieza y el comercio justo.</p>
+  <p>Elaborar este plan permitió aplicar las herramientas del curso: reconocer las conductas emprendedoras, definir el perfil del cliente, ordenar el negocio en el modelo Canvas, ubicar las zonas de operación y estimar precios y punto de equilibrio antes de invertir. El siguiente paso es validar la idea en una feria artesanal, escuchar a los clientes y ajustar el plan.</p>
+  <div class="learn"><p><b>Lo que aprendí:</b> Aprendí que emprender no empieza con dinero, sino con observar un problema y ordenarlo paso a paso. Como estudiante de Ingeniería de Software, descubrí que planificar un negocio se parece a diseñar un sistema: hay que conocer al usuario, medir y mejorar. Y como amante del arte, entendí que la cultura también puede ser un buen negocio cuando se trata con respeto.</p></div>
+  <div class="popzone" style="height:210px;margin-top:14px"><div class="photo pop" style="--d:.3s;--z:12;inset:0"><div class="slot" data-src="img/cierre.jpg" data-label="Imagen de cierre: piezas artesanales juntas (horizontal)"></div><div class="cap">Llévate un pedazo de Panamá, hecho a mano</div></div></div>
+  <div class="folio"><span>Panamá a Mano · Edición No. 1</span><span>p. 16</span></div>
+  <button class="corner" data-dir="1" aria-label="Siguiente"></button>
+</section>
+
+<!-- P17 · BIBLIOGRAFÍA -->
+<section class="pg stripe-l">
+  <div class="kicker">Fuentes</div>
+  <h2 class="ttl">Bibliografía</h2>
+  <p class="ref">Camargo, J. V. (s.f.). <i>Formación de emprendedores: Iniciando mi emprendimiento. Cómo generar ideas de negocio</i> [Presentación de diapositivas]. Universidad Tecnológica de Panamá.</p>
+  <p class="ref">Clark, T., Osterwalder, A., &amp; Pigneur, Y. (2012). <i>Tu modelo de negocio</i>. Deusto.</p>
+  <p class="ref">Crespo, S. (2024, 10 de noviembre). Marianela González: «Enseñar técnicas artesanales crea un legado para el futuro». <i>La Estrella de Panamá</i>. https://www.laestrella.com.pa/vida-y-cultura/marianela-gonzalez-ensenar-tecnicas-artesanales-crea-un-legado-para-el-futuro-YX9321625</p>
+  <p class="ref">HubSpot. (s.f.). <i>Plan de negocios efectivo: Método paso a paso</i>. https://blog.hubspot.es/marketing/como-crear-plan-comercial</p>
+  <p class="ref">Silva, J. (2008). <i>Emprendedor: Crear su propia empresa</i>. Alfaomega.</p>
+  <p class="ref">Universidad Tecnológica de Panamá. (s.f.-a). <i>Módulo 1, Unidad 1: Inducción al emprendimiento y sensibilización</i> [Material del curso].</p>
+  <p class="ref">Universidad Tecnológica de Panamá. (s.f.-b). <i>Módulo 4, Unidad 4: Generación y validación de ideas de negocios</i> [Material del curso].</p>
+  <p class="ref">Universidad Tecnológica de Panamá. (s.f.-c). <i>Módulo 3, Unidad 3: Proceso de desarrollo de idea de negocio</i> [Material del curso].</p>
+    <div class="folio"><span>p. 17</span><span>Panamá a Mano</span></div>
+  <button class="corner" data-dir="-1" aria-label="Anterior"></button>
+</section>
+
+<!-- P18 · CONTRAPORTADA -->
+<section class="pg bg-ink backcover">
+  <div class="popzone">
+    <div class="ml ml1 pop" style="--d:.15s;--z:4"></div>
+    <div class="ml ml2 pop" style="--d:.35s;--z:8"></div>
+    <div class="ml ml3 pop" style="--d:.55s;--z:12"></div>
+    <div class="seal pop" style="--d:.8s;--z:16;left:calc(50% - 52px);right:auto;top:auto;bottom:40px">Gracias<br>por<br>leer</div>
+    <div class="ground"></div>
+  </div>
+  <h2>Panamá a Mano · E-Magazine</h2>
+  <div class="big">Llévate un pedazo<br>de Panamá</div>
+  <p style="margin-top:14px">Edición No. 1 · Noviembre 2026 · Publicación semestral<br>Revista elaborada por María Madrid<br>Formación de Emprendedores · Universidad Tecnológica de Panamá</p>
+  <p style="opacity:.7;font-style:italic">Próxima edición: primer semestre de 2027</p>
+</section>
+
+</div>
+
+<script>
+/* ================== GENERADORES SVG (figuras de papel) ================== */
+const SVG={
+ skyBack:()=>{let s='<svg viewBox="0 0 580 180" width="100%" height="100%" preserveAspectRatio="none">';
+   const b=[[0,70,90],[60,60,120],[110,90,70],[190,50,110],[260,80,80],[330,60,130],[400,90,95],[480,100,70]];
+   b.forEach(([x,w,h])=>s+=`<rect x="${x}" y="${180-h}" width="${w}" height="${h}" fill="#d9c8a6"/>`);
+   return s+'</svg>'},
+ skyFront:()=>{let s='<svg viewBox="0 0 580 180" width="100%" height="100%" preserveAspectRatio="none">';
+   const fac=(x,w,h,c)=>{let o=`<rect x="${x}" y="${180-h}" width="${w}" height="${h}" fill="${c}"/><rect x="${x-4}" y="${180-h-6}" width="${w+8}" height="8" fill="#f7efe1"/>`;
+     for(let r=0;r<Math.floor((h-20)/38);r++){for(let i=0;i<Math.floor(w/30);i++){const wx=x+10+i*30,wy=180-h+14+r*38;
+       o+=`<rect x="${wx}" y="${wy}" width="13" height="22" rx="6" fill="#1c1a2b"/>`}
+       o+=`<rect x="${x+5}" y="${180-h+38+r*38}" width="${w-10}" height="3" fill="#1c1a2b"/>`}return o};
+   s+=fac(0,95,110,'#0f7f81')+fac(100,80,85,'#e9b44c');
+   s+='<rect x="190" y="50" width="38" height="130" fill="#f1e7d3"/><rect x="318" y="50" width="38" height="130" fill="#f1e7d3"/>'
+     +'<polygon points="186,50 209,18 232,50" fill="#c8102e"/><polygon points="314,50 337,18 360,50" fill="#c8102e"/>'
+     +'<rect x="228" y="85" width="90" height="95" fill="#fbf6ec"/><polygon points="222,85 273,48 324,85" fill="#f1e7d3"/>'
+     +'<path d="M258 180 v-36 a15 15 0 0 1 30 0 v36z" fill="#1c1a2b"/><circle cx="273" cy="70" r="8" fill="#1c1a2b"/>'
+     +'<rect x="200" y="66" width="18" height="26" rx="9" fill="#1c1a2b"/><rect x="328" y="66" width="18" height="26" rx="9" fill="#1c1a2b"/>';
+   s+=fac(366,104,100,'#c8102e')+fac(476,104,125,'#ef7d22');
+   return s+'</svg>'},
+ skyMini:()=>{let s='<svg viewBox="0 0 600 130" width="100%" height="100%" preserveAspectRatio="xMidYMax meet">';
+   [[300,60,70,'#0f7f81'],[365,50,95,'#e9b44c'],[420,70,60,'#c8102e'],[495,45,110,'#5a2a82'],[545,55,80,'#ef7d22']].forEach(([x,w,h,c])=>{
+     s+=`<rect x="${x}" y="${130-h}" width="${w}" height="${h}" fill="${c}"/>`;
+     for(let r=0;r<Math.floor(h/26)-1;r++)for(let i=0;i<Math.floor(w/18);i++)s+=`<rect x="${x+6+i*18}" y="${130-h+10+r*26}" width="8" height="14" rx="4" fill="#1c1a2b" opacity=".8"/>`});
+   return s+'</svg>'},
+ barco:()=>'<svg viewBox="0 0 250 120" width="100%" height="100%"><path d="M10 78 h230 l-26 34 h-180z" fill="#1c1a2b"/><rect x="40" y="56" width="170" height="22" fill="#fbf6ec"/><rect x="62" y="38" width="128" height="18" fill="#fbf6ec"/><rect x="88" y="22" width="76" height="16" fill="#fbf6ec"/><rect x="150" y="2" width="20" height="22" fill="#c8102e"/>'
+   +Array.from({length:10},(_,i)=>`<circle cx="${52+i*16}" cy="67" r="4" fill="#0f7f81"/>`).join('')+Array.from({length:7},(_,i)=>`<rect x="${72+i*16}" y="43" width="9" height="8" fill="#0f7f81"/>`).join('')
+   +'<path d="M0 112 q15 -8 30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0" stroke="#0f7f81" stroke-width="4" fill="none"/></svg>',
+ sombrero:()=>'<svg viewBox="0 0 230 150" width="100%" height="100%"><defs><clipPath id="cr"><path d="M62 112 C62 32,168 32,168 112Z"/></clipPath></defs>'
+   +'<ellipse cx="115" cy="114" rx="112" ry="30" fill="#f7efe1" stroke="#1c1a2b" stroke-width="3"/>'
+   +[98,82,66].map(r=>`<ellipse cx="115" cy="114" rx="${r}" ry="${r*.27}" fill="none" stroke="#1c1a2b" stroke-width="5"/>`).join('')
+   +'<path d="M62 112 C62 32,168 32,168 112Z" fill="#f7efe1" stroke="#1c1a2b" stroke-width="3"/>'
+   +'<g clip-path="url(#cr)">'+[50,64,78,92,106].map(y=>`<rect x="50" y="${y}" width="130" height="6" fill="#1c1a2b"/>`).join('')+'</g></svg>',
+ maleta:()=>'<svg viewBox="0 0 200 180" width="100%" height="100%"><path d="M70 40 v-18 a8 8 0 0 1 8 -8 h44 a8 8 0 0 1 8 8 v18" fill="none" stroke="#1c1a2b" stroke-width="8"/>'
+   +'<rect x="14" y="38" width="172" height="130" rx="16" fill="#c8102e" stroke="#1c1a2b" stroke-width="4"/>'
+   +'<rect x="46" y="38" width="14" height="130" fill="#1c1a2b"/><rect x="140" y="38" width="14" height="130" fill="#1c1a2b"/>'
+   +'<rect x="14" y="96" width="172" height="10" fill="#e9b44c"/>'
+   +'<g transform="rotate(14 150 70)"><rect x="128" y="56" width="58" height="34" rx="4" fill="#f7efe1" stroke="#1c1a2b" stroke-width="3"/><circle cx="137" cy="73" r="4" fill="#1c1a2b"/><text x="146" y="80" font-family="Times New Roman" font-size="16" font-weight="700" fill="#1c1a2b">PTY</text></g></svg>',
+ flag:c=>`<svg viewBox="0 0 60 96"><rect x="27" y="4" width="5" height="88" fill="#1c1a2b"/><path d="M32 6 L58 18 L32 32Z" fill="${c}"/><ellipse cx="30" cy="92" rx="14" ry="4" fill="#0003"/><circle cx="29.5" cy="5" r="5" fill="#e9b44c"/></svg>`
+};
+
+/* ================== ARMADO DEL LIBRO ================== */
+const book=document.getElementById('book');
+const pgs=[...document.querySelectorAll('#src > .pg')];
+document.querySelectorAll('[data-svg]').forEach(el=>el.innerHTML=SVG[el.dataset.svg]());
+const N=Math.ceil(pgs.length/2), leaves=[];
+for(let i=0;i<N;i++){
+  const leaf=document.createElement('div');leaf.className='leaf';
+  const f=pgs[2*i];f.classList.add('front');leaf.appendChild(f);
+  let b=pgs[2*i+1];if(!b){b=document.createElement('section');b.className='pg blank';}
+  b.classList.add('back');leaf.appendChild(b);
+  book.appendChild(leaf);leaves.push(leaf);
+}
+const MAX=N-1;
+let state=0,busy=false;
+
+function zfix(){leaves.forEach((l,i)=>l.style.zIndex=i<state?i+1:2*N-i)}
+function visiblePages(s){const v=[];if(s>0)v.push(pgs[2*s-1]);if(pgs[2*s])v.push(pgs[2*s]);return v}
+function popUp(){pgs.forEach(p=>p.classList.remove('up'));
+  setTimeout(()=>visiblePages(state).forEach(p=>p.classList.add('up')),state===0?250:620)}
+function label(){
+  const t=state===0?'Portada':(state===MAX?'Página 17 · Contraportada':'Páginas '+(2*state-1)+' – '+(2*state));
+
+}
+function go(target){
+  target=Math.max(0,Math.min(MAX,target));
+  if(busy||target===state)return;busy=true;
+  const fwd=target>state, from=state, steps=Math.abs(target-from);
+  pgs.forEach(p=>p.classList.remove('up'));
+  for(let k=0;k<steps;k++){
+    const i=fwd?from+k:from-1-k, l=leaves[i];
+    l.style.transitionDelay=(k*0.14)+'s';
+    l.style.zIndex=500+(fwd?k:steps-k)+ (fwd?i:N-i);
+    l.classList.toggle('flipped',fwd);
+  }
+  state=target;book.classList.toggle('closed',state===0);label();
+  const total=1150+steps*140;
+  setTimeout(()=>{leaves.forEach(l=>l.style.transitionDelay='0s');zfix();busy=false},total);
+  setTimeout(()=>visiblePages(state).forEach(p=>p.classList.add('up')),Math.max(620,total-550));
+}
+zfix();label();popUp();
+document.addEventListener('click',e=>{
+  const c=e.target.closest('.corner');if(c){go(state+(+c.dataset.dir));return}
+  const g=e.target.closest('[data-goto]');if(g)go(+g.dataset.goto);
+});
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='PageDown')go(state+1);if(e.key==='ArrowLeft'||e.key==='PageUp')go(state-1)});
+let tx=null;
+document.getElementById('scene').addEventListener('touchstart',e=>{if(!e.target.closest('.disk,.ptab,input'))tx=e.touches[0].clientX},{passive:true});
+document.getElementById('scene').addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>80)go(state+(dx<0?1:-1));tx=null});
+
+/* índice */
+const TOC=[['Introducción',2],['Biografías',3],['Misión, visión y función',5],['Formación del emprendedor',6],['Cliente y propuesta de valor',7],['Modelo Canvas',8],['Comunidad e impacto',9],['Zonificación',10],['Tarifas y catálogo',11],['Punto de equilibrio e inversión',12],['Evaluación (FODA)',13],['¿Sabías que…?',14],['Test emprendedor',15],['Conclusión',16],['Bibliografía',17]];
+document.getElementById('toc').innerHTML=TOC.map(([t,p])=>`<button data-goto="${Math.ceil(p/2)}"><i>${String(p).padStart(2,'0')}</i>${t}<span class="dots"></span>${p}</button>`).join('');
+
+/* ================== ESCALA Y PARALLAX ================== */
+function fit(){const k=Math.min(innerHeight/860,innerWidth/1240),sc=document.getElementById('scaler');
+  sc.style.transform='scale('+k+')'}
+window.addEventListener('resize',fit);fit();
+window.addEventListener('mousemove',e=>{book.style.setProperty('--mx',((e.clientX/innerWidth)-.5)*2);book.style.setProperty('--my',((e.clientY/innerHeight)-.5)*2)});
+
+/* ================== HERRAMIENTAS ================== */
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),2200)}
+
+/* ================== IMÁGENES ================== */
+document.querySelectorAll('.slot').forEach(s=>{
+  const src=s.dataset.src,label=s.dataset.label||'Imagen';
+  s.innerHTML='<div class="ph"><b>'+label+'</b>Guárdala como<br><code>'+src+'</code></div>';
+  const img=new Image();img.alt=label;img.onload=()=>{if(!img.parentNode)s.appendChild(img);s.classList.add('filled')};img.src=src;
+  s.addEventListener('click',e=>{e.stopPropagation();const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
+    inp.onchange=()=>{const f=inp.files[0];if(!f)return;img.src=URL.createObjectURL(f);toast('Vista previa. Para dejarla fija, guárdala como '+src)};inp.click()});
+});
+
+/* ================== SOLAPAS ================== */
+document.querySelectorAll('.flap').forEach(f=>f.addEventListener('click',()=>{
+  const g=f.closest('[data-group]');const was=f.classList.contains('open');
+  if(g)g.querySelectorAll('.flap').forEach(x=>x.classList.remove('open'));
+  f.classList.toggle('open',!was)}));
+
+/* ================== RUEDA CANVAS ================== */
+const CV=[
+ ['Socios clave','Comunidades y cooperativas artesanas, hoteles que exhiben piezas, guías turísticos, agencias de cruceros y empresas de mensajería.'],
+ ['Actividades clave','Seleccionar piezas en las comunidades, controlar su calidad, fotografiarlas y etiquetarlas con su historia, vender y gestionar envíos.'],
+ ['Recursos clave','Inventario, tienda en línea, redes sociales, un local en zona turística (segunda fase) y la confianza de las artesanas.'],
+ ['Propuesta de valor','Artesanía 100 % panameña, verificada y con historia, comprada a un precio justo y empacada para viajar.'],
+ ['Relación con clientes','Atención personal y bilingüe, historias de las artesanas en redes sociales y seguimiento después de la compra.'],
+ ['Canales','Tienda física, ferias artesanales, puestos en temporada de cruceros, tienda web e Instagram.'],
+ ['Segmentos de clientes','Turistas extranjeros, pasajeros de cruceros, viajeros de negocios y empresas que buscan regalos corporativos.'],
+ ['Estructura de costos','Compra de piezas a precio justo, alquiler, salario del vendedor, empaques, envíos y publicidad digital.'],
+ ['Fuentes de ingreso','Venta directa en tienda y ferias, ventas en línea con envío internacional y pedidos corporativos.']
+];
+const disk=document.getElementById('disk');
+const SHORT=['Socios','Actividades','Recursos','Propuesta de valor','Relaciones','Canales','Segmentos','Costos','Ingresos'];
+SHORT.forEach((t,i)=>{const l=document.createElement('div');l.className='lbl';l.textContent=t;
+  l.style.transform=`rotate(${i*40}deg) translateY(-135px) translateY(-50%)`;disk.appendChild(l)});
+let vi=0,ang=0;
+function setV(i,animate=true){vi=((i%9)+9)%9;ang=Math.round(ang/40)*40;const target=-i*40;ang=target;
+  disk.style.transform=`rotate(${ang}deg)`;
+  document.getElementById('vtext').innerHTML='<h3>'+CV[vi][0]+'</h3><p>'+CV[vi][1]+'</p>'}
+let vIdx=0;
+document.getElementById('vnext').onclick=()=>{vIdx++;setV(vIdx)};
+document.getElementById('vprev').onclick=()=>{vIdx--;setV(vIdx)};
+let dragA=null,startAng=0,moved=false;
+const angOf=e=>{const r=disk.getBoundingClientRect();return Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2))*180/Math.PI};
+disk.addEventListener('pointerdown',e=>{dragA=angOf(e);startAng=ang;moved=false;disk.classList.add('drag');disk.setPointerCapture(e.pointerId)});
+disk.addEventListener('pointermove',e=>{if(dragA===null)return;let d=angOf(e)-dragA;if(Math.abs(d)>3)moved=true;ang=startAng+d;disk.style.transform=`rotate(${ang}deg)`});
+disk.addEventListener('pointerup',()=>{if(dragA===null)return;disk.classList.remove('drag');dragA=null;
+  if(!moved){vIdx++;setV(vIdx);return}vIdx=Math.round(-ang/40);setV(vIdx)});
+setV(3);vIdx=3;
+
+/* ================== LENGÜETA ================== */
+(function(){const pull=document.getElementById('pull'),cov=document.getElementById('pcover'),tab=document.getElementById('ptab');let sx=null,p=0,w0=0;
+  const set=v=>{p=Math.max(0,Math.min(1,v));cov.style.width=(100-p*100)+'%';cov.classList.toggle('open',p>.25)};
+  tab.addEventListener('pointerdown',e=>{e.stopPropagation();sx=e.clientX;w0=p;cov.style.transition='none';tab.setPointerCapture(e.pointerId)});
+  tab.addEventListener('pointermove',e=>{if(sx===null)return;const scale=pull.getBoundingClientRect().width/pull.offsetWidth;set(w0+(e.clientX-sx)/scale/pull.offsetWidth)});
+  tab.addEventListener('pointerup',e=>{if(sx===null)return;const moved=Math.abs(e.clientX-sx)>4;sx=null;cov.style.transition='width .6s cubic-bezier(.3,1.3,.5,1)';
+    if(!moved)set(p>.5?0:1);else set(p>.4?1:0)});
+})();
+
+/* ================== ZONAS ================== */
+const Z=[
+ ['Casco Antiguo','Tienda principal','#c8102e',58,'Es la zona más visitada por turistas en la ciudad. Aquí estará la tienda física (segunda fase del plan), con atención bilingüe y una pared que cuenta la historia de las artesanas.'],
+ ['Amador y cruceros','Ventas en temporada','#0f7f81',13,'En temporada de cruceros instalamos un puesto móvil en ferias y mercados. Los cruceristas tienen poco tiempo, así que ofrecemos piezas ligeras y fáciles de empacar.'],
+ ['Hoteles aliados','Exhibición y alianzas','#5a2a82',75,'Vitrinas pequeñas en hoteles de la ciudad, con un código QR que lleva a la tienda en línea. El hotel recibe una comisión por cada venta.'],
+ ['Tienda en línea','Panamá y el mundo','#ef7d22',40,'Catálogo digital con envío nacional e internacional, para vender también a quienes ya regresaron a su país.'],
+ ['Comunidades','Compras y abastecimiento','#e9b44c',91,'Guna Yala, Darién, Coclé y Azuero: aquí no vendemos, compramos. Visitamos las comunidades para seleccionar piezas, acordar precios justos y planificar pedidos.']
+];
+const fl=document.getElementById('flags'),zi=document.getElementById('zinfo');
+function showZ(i){[...fl.children].forEach((b,j)=>b.classList.toggle('on',i===j));const z=Z[i];
+  zi.classList.remove('swap');void zi.offsetWidth;zi.classList.add('swap');zi.style.borderColor=z[2];
+  zi.innerHTML='<div class="kicker" style="color:'+z[2]+'">'+z[1]+'</div><h3>'+z[0]+'</h3><p>'+z[4]+'</p>'}
+Z.forEach((z,i)=>{const b=document.createElement('button');b.className='flag pop';b.style.left=z[3]+'%';b.style.setProperty('--d',(.6+i*.15)+'s');b.style.setProperty('--z',10+i*2);
+  b.innerHTML=SVG.flag(z[2])+'<span>'+z[0]+'</span>';b.onclick=e=>{e.stopPropagation();showZ(i)};fl.appendChild(b)});
+showZ(0);
+
+/* ================== PRODUCTOS ================== */
+const P=[
+ ['Mola pequeña','B/. 25','B/. 15','B/. 10','Comarca Guna Yala','mola.jpg'],
+ ['Mola enmarcada','B/. 90','B/. 55','B/. 35','Comarca Guna Yala','mola-grande.jpg'],
+ ['Sombrero pintao','B/. 60 – 150','B/. 40','desde B/. 20','La Pintada, Coclé','sombrero.jpg'],
+ ['Cesta tejida','B/. 35','B/. 22','B/. 13','Comunidades emberá y wounaan','cesta.jpg'],
+ ['Figura de tagua','B/. 12','B/. 7','B/. 5','Comunidades emberá y wounaan','tagua.jpg'],
+ ['Tembleques (par)','B/. 15','B/. 9','B/. 6','Región de Azuero','tembleque.jpg']
+];
+const pr=document.getElementById('prods');
+P.forEach((p,i)=>{const d=document.createElement('div');d.className='prod pop';d.style.setProperty('--d',(.2+i*.12)+'s');d.style.setProperty('--z',6+i);
+  d.innerHTML=`<div class="in"><div class="pf"><div class="simg"><div class="slot" data-src="img/${p[5]}" data-label="Foto: ${p[0].toLowerCase()}"></div></div><h3>${p[0]}</h3><div class="price">${p[1]}</div><button class="more">Ver detalle</button></div>
+  <div class="pb"><dl><dt>Costo</dt><dd>${p[2]}</dd><dt>Margen</dt><dd>${p[3]}</dd><dt>Origen</dt><dd>${p[4]}</dd></dl><button class="more">Volver</button></div></div>`;
+  d.querySelectorAll('.more').forEach(b=>b.onclick=e=>{e.stopPropagation();d.classList.toggle('flip')});pr.appendChild(d)});
+/* volver a preparar slots creados dinámicamente */
+pr.querySelectorAll('.slot').forEach(s=>{const src=s.dataset.src,label=s.dataset.label;
+  s.innerHTML='<div class="ph"><b>'+label+'</b><code>'+src+'</code></div>';
+  const img=new Image();img.onload=()=>{if(!img.parentNode)s.appendChild(img);s.classList.add('filled')};img.src=src;
+  s.addEventListener('click',e=>{e.stopPropagation();const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
+    inp.onchange=()=>{const f=inp.files[0];if(f){img.src=URL.createObjectURL(f);toast('Vista previa. Guárdala como '+src)}};inp.click()})});
+
+/* ================== CALCULADORA ================== */
+const cf=document.getElementById('cf'),pv=document.getElementById('pv'),cvx=document.getElementById('cv');
+function calc(){const F=+cf.value,Pp=+pv.value,C=+cvx.value;
+  ocf.textContent='B/. '+F.toLocaleString('es-PA');opv.textContent='B/. '+Pp;ocv.textContent='B/. '+C;
+  if(Pp<=C){pe.textContent='—';pe2.textContent='El precio debe ser mayor que el costo por pieza.';return}
+  const u=Math.ceil(F/(Pp-C));pe.textContent=u;
+  pe2.innerHTML='<b>piezas al mes</b><br>unas '+Math.ceil(u/26)+' por día · ventas de B/. '+(u*Pp).toLocaleString('es-PA')+' · margen de B/. '+(Pp-C)+' por pieza'}
+[cf,pv,cvx].forEach(i=>i.addEventListener('input',calc));calc();
+
+/* ================== TEST ================== */
+const Q=[
+ ['Cuando ves un problema en tu entorno, tú…',['Espero que alguien más lo resuelva','Pienso en cómo se podría resolver','Busco una solución y la pruebo']],
+ ['Ante un proyecto con riesgo, tú…',['Prefiero no arriesgarme','Lo hago si alguien me acompaña','Calculo el riesgo y decido']],
+ ['Si algo te sale mal la primera vez…',['Lo dejo','Lo intento una vez más','Analizo qué falló y lo vuelvo a intentar']],
+ ['Para alcanzar una meta, tú…',['Improviso sobre la marcha','Tengo una idea general','Hago un plan con pasos y fechas']],
+ ['¿Qué tanto te gusta hacer contactos?',['Poco','Lo normal','Mucho: cada contacto es una oportunidad']]
+];
+let qi=0,score=0;const qs=document.getElementById('qsteps'),qb=document.getElementById('qbar');
+function renderQ(){qb.innerHTML=Q.map((_,i)=>'<i class="'+(i<qi?'on':'')+'"></i>').join('');
+  if(qi>=Q.length){const pct=Math.round(score/(Q.length*3)*100);
+    const msg=pct>=85?'¡Tienes alma emprendedora! Muestras iniciativa, planificación y persistencia.':pct>=60?'Vas por buen camino. Fortalece la planificación y el riesgo calculado.':'El espíritu emprendedor se entrena: empieza con pequeños proyectos y metas medibles.';
+    qs.innerHTML='<div class="qres"><div class="score">'+pct+'%</div><p>'+msg+'</p><button class="qagain" id="qagain">Repetir el test</button></div>';
+    document.getElementById('qagain').onclick=()=>{qi=0;score=0;renderQ()};return}
+  const [q,o]=Q[qi];
+  qs.innerHTML='<h3>'+(qi+1)+'. '+q+'</h3><div class="qopts">'+o.map((t,i)=>'<button class="qopt" data-v="'+(i+1)+'">'+t+'</button>').join('')+'</div>';
+  qs.querySelectorAll('.qopt').forEach(b=>b.onclick=()=>{score+=+b.dataset.v;qi++;renderQ()})}
+renderQ();
+</script>
+</body>
+</html>
